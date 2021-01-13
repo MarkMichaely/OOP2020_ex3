@@ -21,16 +21,18 @@ class NodeData:
             other.edges_out.values())
 
     def __str__(self):
-        if self.pos != ():
-            return f"id: {self.key}, pos: {self.pos}"
-        else:
-            return f"id: {self.key}"
-
+        return f"{self.key}"
+        #if self.pos != ():
+        #    return f"id: {self.key}, pos: {self.pos}"
+        #else:
+        #    return f"id: {self.key}"
+#
     def __repr__(self):
-        if self.pos is not None:
-            return f"id: {self.key}, pos: {self.pos}"
-        else:
-            return f"id: {self.key}"
+        return f"{self.key}"
+        #if self.pos is not None:
+        #    return f"id: {self.key}, pos: {self.pos}"
+        #else:
+        #    return f"id: {self.key}"
 
     def __lt__(self, other):
         return self.weight < other.weight
