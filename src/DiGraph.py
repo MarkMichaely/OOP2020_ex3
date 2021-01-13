@@ -38,29 +38,38 @@ class NodeData:
     def __hash__(self):
         return hash(str(self))
 
+    def to_json(self):
+        try:
+            if self.pos is None:
+                return {"id": self.key}
+            else:
+                return {"id": self.key, "pos": f"{self.pos[0]},{self.pos[1]},{self.pos[2]}"}
+        except Exception as e:
+            print(e)
+
 
 class DiGraph(GraphInterface):
     """This class represents a directed weighted graph """
 
     def __init__(self):
         self.vertex = {}
-        self.vertex_size = 0
-        self.edge_size = 0
-        self.mode_count = 0
+        self.__vertex_size = 0
+        self.__edge_size = 0
+        self.__mode_count = 0
 
     def v_size(self) -> int:
         """
         Returns the number of vertices in this graph
         @return: The number of vertices in this graph
         """
-        return self.vertex_size
+        return self.__vertex_size
 
     def e_size(self) -> int:
         """
         Returns the number of edges in this graph
         @return: The number of edges in this graph
         """
-        return self.edge_size
+        return self.__edge_size
 
     def get_all_v(self) -> dict:
         """return a dictionary of all the nodes in the Graph, each node is represented using a pair
@@ -92,7 +101,7 @@ class DiGraph(GraphInterface):
         on every change in the graph state - the MC should be increased
         @return: The current version of this graph.
         """
-        return self.mode_count
+        return self.__mode_count
 
     def add_edge(self, id1: int, id2: int, weight: float) -> bool:
         """
@@ -108,8 +117,8 @@ class DiGraph(GraphInterface):
             if id2 not in self.vertex.get(id1).edges_out:
                 self.vertex.get(id1).edges_out[id2] = weight
                 self.vertex.get(id2).edges_in[id1] = weight
-                self.edge_size += 1
-                self.mode_count += 1
+                self.__edge_size += 1
+                self.__mode_count += 1
                 return True
         return False
 
@@ -127,8 +136,8 @@ class DiGraph(GraphInterface):
         else:
             node_data = NodeData(key=node_id, pos=pos)
             self.vertex[node_id] = node_data
-            self.vertex_size += 1
-            self.mode_count += 1
+            self.__vertex_size += 1
+            self.__mode_count += 1
             return True
 
     def remove_node(self, node_id: int) -> bool:
@@ -143,13 +152,13 @@ class DiGraph(GraphInterface):
             if self.all_in_edges_of_node(node_id) is not None:
                 for key in self.all_in_edges_of_node(node_id).keys():
                     self.vertex.get(key).edges_out.pop(node_id)
-                    self.edge_size -= 1
+                    self.__edge_size -= 1
             if self.all_out_edges_of_node(node_id) is not None:
                 for key in self.all_out_edges_of_node(node_id).keys():
                     self.vertex.get(key).edges_in.pop(node_id)
-                    self.edge_size -= 1
+                    self.__edge_size -= 1
             self.vertex -= 1
-            self.mode_count += 1
+            self.__mode_count += 1
             self.vertex.pop(node_id)
             return True
         return False
@@ -167,8 +176,8 @@ class DiGraph(GraphInterface):
             if node_id2 in self.vertex.get(node_id1).edges_out:
                 self.vertex.get(node_id1).edges_out.pop(node_id2)
                 self.vertex.get(node_id2).edges_in.pop(node_id1)
-                self.mode_count += 1
-                self.edge_size -= 1
+                self.__mode_count += 1
+                self.__edge_size -= 1
                 return True
 
         return False
@@ -178,3 +187,22 @@ class DiGraph(GraphInterface):
             return False
         return self.vertex.__eq__(other.vertex)
 
+    def to_json(self) -> object:
+        try:
+            nodes = []
+            edges = []
+            json_dict = {}
+            for node in self.get_all_v().values():
+                if node.pos is None:
+                    nodes.append({"id: ": node.key})
+                else:
+                    nodes.append({"id: ": node.key, "pos": f"{node.pos[0]},{node.pos[1]},{node.pos[2]}"})
+            for key in self.vertex.keys():
+                for dest, w in self.all_out_edges_of_node(key).items():
+                    edges.append({"src": key, "dest": dest, "w": w})
+            json_dict["Nodes"] = nodes
+            json_dict["Edges"] = edges
+
+        except Exception as e:
+            print(e)
+        return json_dict

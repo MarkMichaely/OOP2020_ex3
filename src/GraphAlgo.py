@@ -1,3 +1,4 @@
+import json
 import random
 from typing import List
 
@@ -28,10 +29,30 @@ class GraphAlgo(GraphAlgoInterface):
         return self.graph
 
     def load_from_json(self, file_name: str) -> bool:
-        pass
+        try:
+            with open(file_name, "r") as o:
+                json_string = json.load(o)
+            g = DiGraph()
+            for node in json_string["Nodes"]:
+                if "pos" in node:
+                    pos = tuple(map(float, str(node["pos"]).split(",")))
+                    g.add_node(node_id=node["id"], pos=pos)
+                else:
+                    g.add_node(node_id=node["id"])
+
+            for edge in json_string["edges"]:
+                g.add_edge(id1=edge["src"], id2=edge["dest"], weight=edge["w"])
+            self.graph = g
+            return True
+        except IOError as e:
+            print(e)
 
     def save_to_json(self, file_name: str) -> bool:
-        pass
+        try:
+            with open(file_name, "w") as o:
+                json.dump(self.graph.to_json(), default=lambda a: a.to_json())
+        except IOError as e:
+            print(e)
 
     def shortest_path(self, id1: int, id2: int) -> (float, list):
         """
@@ -85,7 +106,7 @@ class GraphAlgo(GraphAlgoInterface):
         key_list = []
         for node in self.graph.get_all_v().values():
             if node.pos is None:
-                node.pos = (random.randrange(25), random.randrange(25), random.randrange(25))
+                node.pos = (random.randrange(50), random.randrange(40), random.randrange(10))
             x_list.append(node.pos[0])
             y_list.append(node.pos[1])
             key_list.append(node.key)
@@ -93,7 +114,6 @@ class GraphAlgo(GraphAlgoInterface):
         ax.scatter(x_list, y_list)
         for i, txt in enumerate(key_list):
             ax.annotate(key_list[i], {x_list[i], y_list[i]})
-        plt.title("graph")
         plt.plot(x_list, y_list, ".", color='red')
         for node in self.graph.get_all_v().values():
             x_src = node.pos[0]
@@ -104,6 +124,7 @@ class GraphAlgo(GraphAlgoInterface):
                 y_dest = node_dest.pos[1]
                 plt.arrow(x_src, y_src, (x_dest - x_src), (y_dest - y_src), length_includes_head=True, width=0.0001,
                           head_width=0.3, color='black')
+        plt.title("graph")
         plt.show()
 
     def set_graph_to_inf(self):
