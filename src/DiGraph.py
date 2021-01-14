@@ -21,24 +21,25 @@ class NodeData:
             other.edges_out.values())
 
     def __str__(self):
-        return f"{self.key}"
-        #if self.pos != ():
+        return f"id:{self.key}"
+        # if self.pos != ():
         #    return f"id: {self.key}, pos: {self.pos}"
-        #else:
+        # else:
         #    return f"id: {self.key}"
-#
+
+    #
     def __repr__(self):
-        return f"{self.key}"
-        #if self.pos is not None:
+        return f"id:{self.key}"
+        # if self.pos is not None:
         #    return f"id: {self.key}, pos: {self.pos}"
-        #else:
+        # else:
         #    return f"id: {self.key}"
 
     def __lt__(self, other):
         return self.weight < other.weight
 
     def __hash__(self):
-        return hash(str(self))
+        return hash(self.key)
 
     def to_json(self):
         try:
@@ -115,7 +116,7 @@ class DiGraph(GraphInterface):
 
         Note: If the edge already exists or one of the nodes dose not exists the functions will do nothing
         """
-        if id1 in self.vertex and id2 in self.vertex:
+        if id1 in self.vertex and id2 in self.vertex and weight >= 0:
             if id2 not in self.vertex.get(id1).edges_out:
                 self.vertex.get(id1).edges_out[id2] = weight
                 self.vertex.get(id2).edges_in[id1] = weight
@@ -159,7 +160,7 @@ class DiGraph(GraphInterface):
                 for key in self.all_out_edges_of_node(node_id).keys():
                     self.vertex.get(key).edges_in.pop(node_id)
                     self.__edge_size -= 1
-            self.vertex -= 1
+            self.__vertex_size -= 1
             self.__mode_count += 1
             self.vertex.pop(node_id)
             return True
@@ -189,6 +190,9 @@ class DiGraph(GraphInterface):
             return False
         return self.vertex.__eq__(other.vertex)
 
+    def __hash__(self):
+        return hash(self.vertex)+hash(self.__vertex_size)+hash(self.__edge_size)
+
     def to_json(self) -> object:
         try:
             nodes = []
@@ -196,9 +200,9 @@ class DiGraph(GraphInterface):
             json_dict = {}
             for node in self.get_all_v().values():
                 if node.pos is None:
-                    nodes.append({"id: ": node.key})
+                    nodes.append({"id": node.key})
                 else:
-                    nodes.append({"id: ": node.key, "pos": f"{node.pos[0]},{node.pos[1]},{node.pos[2]}"})
+                    nodes.append({"id": node.key, "pos": f"{node.pos[0]},{node.pos[1]},{node.pos[2]}"})
             for key in self.vertex.keys():
                 for dest, w in self.all_out_edges_of_node(key).items():
                     edges.append({"src": key, "dest": dest, "w": w})

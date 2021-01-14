@@ -91,7 +91,7 @@ class GraphAlgo(GraphAlgoInterface):
         else:
             node = node_dest
             while node is not None:
-                path.append(node)
+                path.append(node.key)
                 node = parents.get(node)
             path.reverse()
         return node_dest.weight, path
@@ -108,7 +108,7 @@ class GraphAlgo(GraphAlgoInterface):
         if self.graph is None or id1 not in self.graph.get_all_v():
             return []
         self.set_graph_to_inf()
-        scc = self.kosaraju(id1)
+        scc = self.__kosaraju(id1)
         return scc
 
     def connected_components(self) -> List[list]:
@@ -124,7 +124,7 @@ class GraphAlgo(GraphAlgoInterface):
         scc_list = []
         for node in self.graph.get_all_v().keys():
             if self.graph.vertex.get(node).tag == 0:
-                scc = self.kosaraju(node)
+                scc = self.__kosaraju(node)
                 for n in scc:
                     self.graph.vertex.get(n).tag = 1
                 scc_list.append(scc)
@@ -159,7 +159,7 @@ class GraphAlgo(GraphAlgoInterface):
                 x_dest = node_dest.pos[0]
                 y_dest = node_dest.pos[1]
                 plt.arrow(x_src, y_src, (x_dest - x_src), (y_dest - y_src), length_includes_head=True, width=0.00001,
-                          head_width=0.00015, color='black')
+                          head_width=0.00006, color='black')
         plt.title("graph")
         plt.show()
 
@@ -169,7 +169,7 @@ class GraphAlgo(GraphAlgoInterface):
             node.weight = math.inf
             node.tag = 0
 
-    def kosaraju(self, src: int):
+    def __kosaraju(self, src: int):
         visited_in = set()
         visited_out = set()
         stack_out = [src]
